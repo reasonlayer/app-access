@@ -1,0 +1,53 @@
+{
+  "name": "@reasonlayer/app-access",
+  "version": "0.0.1",
+  "description": "Convex component for managing third-party app access via API keys and OAuth connections",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reasonlayer/reasonlayer-app-access.git"
+  },
+  "keywords": ["convex", "component", "app-access", "oauth", "api-keys"],
+  "packageManager": "pnpm@10.12.4",
+  "exports": {
+    ".": "./src/client/index.ts",
+    "./convex.config": "./src/component/convex.config.ts",
+    "./convex.config.js": "./src/component/convex.config.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/client/index.d.ts",
+        "default": "./dist/client/index.js"
+      },
+      "./convex.config": {
+        "types": "./dist/component/convex.config.d.ts",
+        "default": "./dist/component/convex.config.js"
+      },
+      "./convex.config.js": {
+        "types": "./dist/component/convex.config.d.ts",
+        "default": "./dist/component/convex.config.js"
+      }
+    }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run clean && npm run build",
+    "release": "npm version patch && npm publish && git push --follow-tags"
+  },
+  "peerDependencies": {
+    "convex": "^1.31.6"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "convex": "^1.31.6",
+    "convex-test": "^0.0.41",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}
