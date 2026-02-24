@@ -84,18 +84,17 @@ Send an email.
 - `subject` (string, required): Email subject
 - `body` (string, required): Email body (plain text)
 
-### GMAIL_LIST_EMAILS
-List recent emails from the inbox.
-- `maxResults` (number, optional): Max emails to return (default 10)
+### GMAIL_FETCH_EMAILS
+Fetch emails from the inbox with optional filtering.
+- `max_results` (number, optional): Max emails to return (default 10)
 
-### GMAIL_READ_EMAIL
-Read a specific email by ID.
-- `messageId` (string, required): The email message ID
+### GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID
+Read a specific email by its message ID.
+- `message_id` (string, required): The email message ID
 
-### GMAIL_SEARCH_EMAILS
-Search emails by query.
-- `query` (string, required): Gmail search query (same syntax as Gmail search bar)
-- `maxResults` (number, optional): Max emails to return (default 10)
+### GMAIL_FETCH_MESSAGE_BY_THREAD_ID
+Retrieve all messages in an email thread.
+- `thread_id` (string, required): The email thread ID
 
 ## Error Handling
 
