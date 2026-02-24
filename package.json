@@ -1,6 +1,6 @@
 {
   "name": "@reasonlayer/app-access",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Convex component for managing third-party app access via API keys and OAuth connections",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,13 @@
     "type": "git",
     "url": "https://github.com/reasonlayer/reasonlayer-app-access.git"
   },
-  "keywords": ["convex", "component", "app-access", "oauth", "api-keys"],
+  "keywords": [
+    "convex",
+    "component",
+    "app-access",
+    "oauth",
+    "api-keys"
+  ],
   "packageManager": "pnpm@10.12.4",
   "exports": {
     ".": "./src/client/index.ts",
@@ -31,7 +37,10 @@
       }
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
