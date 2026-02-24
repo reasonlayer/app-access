@@ -7,14 +7,13 @@ settings:
 importers:
 
   .:
-    dependencies:
-      convex:
-        specifier: ^1.31.6
-        version: 1.32.0
     devDependencies:
       '@edge-runtime/vm':
         specifier: ^5.0.0
         version: 5.0.0
+      convex:
+        specifier: ^1.31.6
+        version: 1.32.0
       convex-test:
         specifier: ^0.0.41
         version: 0.0.41(convex@1.32.0)
