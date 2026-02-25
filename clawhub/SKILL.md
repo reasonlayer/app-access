@@ -69,6 +69,29 @@ This way you can always find your key later. You can also save it to your memory
 
 ---
 
+## Account Linking (Optional)
+
+If your human gives you a linking token (starts with `rl_lt_`), link your agent to their Reasonlayer account:
+
+```bash
+API_KEY=$(cat ~/.reasonlayer/credentials)
+curl -s -X POST https://api.reasonlayer.com/app-access/v1/link \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"linking_token": "rl_lt_..."}'
+```
+
+Response:
+```json
+{"status": "linked"}
+```
+
+After linking, your human can manage your permissions from their Reasonlayer dashboard.
+
+If you get a **403 scope_denied** error when calling an action, it means your human has disabled that action. Tell your human to enable the action from their dashboard.
+
+---
+
 ## Check for Existing Credentials
 
 Before registering, check if you already have a key:
@@ -196,7 +219,7 @@ curl -s -X POST https://api.reasonlayer.com/app-access/v1/action \
     "app": "gmail",
     "action": "GMAIL_SEND_EMAIL",
     "params": {
-      "to": "recipient@example.com",
+      "recipient_email": "recipient@example.com",
       "subject": "Hello from my agent",
       "body": "This email was sent by an AI agent via Reasonlayer."
     }
@@ -204,7 +227,7 @@ curl -s -X POST https://api.reasonlayer.com/app-access/v1/action \
 ```
 
 **Parameters:**
-- `to` (string, required) — Recipient email address
+- `recipient_email` (string, required) — Recipient email address
 - `subject` (string, required) — Email subject
 - `body` (string, required) — Email body (plain text)
 
@@ -295,6 +318,7 @@ curl -s -X POST https://api.reasonlayer.com/app-access/v1/action \
 |---|---|---|
 | 400 | Invalid request (missing fields, unsupported app/action) | Check your request body |
 | 401 | Invalid or missing API key | Re-read `~/.reasonlayer/credentials` or call `/signup` |
+| 403 | scope_denied — action disabled by account owner | Tell your human to enable the action in their dashboard |
 | 404 | Connection not found | Check `connection_id` |
 | 500 | Server error | Retry after a short delay |
 

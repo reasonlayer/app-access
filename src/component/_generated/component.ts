@@ -60,6 +60,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         { apiKey: string; apiKeyId: string },
         Name
       >;
+      getAccountLink: FunctionReference<
+        "query",
+        "internal",
+        { apiKeyId: string },
+        { externalAccountId: string; linkedAt: number } | null,
+        Name
+      >;
       getActiveConnectionByApiKeyAndApp: FunctionReference<
         "query",
         "internal",
@@ -88,6 +95,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         } | null,
         Name
       >;
+      getApiKeyById: FunctionReference<
+        "query",
+        "internal",
+        { id: string },
+        {
+          _id: string;
+          agentName: string;
+          createdAt: number;
+          status: "active" | "revoked";
+        } | null,
+        Name
+      >;
       getConnectionById: FunctionReference<
         "query",
         "internal",
@@ -104,6 +123,39 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         } | null,
         Name
       >;
+      getConnectionsByApiKey: FunctionReference<
+        "query",
+        "internal",
+        { apiKeyId: string },
+        Array<{
+          _id: string;
+          app: string;
+          createdAt: number;
+          status: "initiated" | "active" | "expired" | "failed";
+        }>,
+        Name
+      >;
+      getLinkedApiKeys: FunctionReference<
+        "query",
+        "internal",
+        { externalAccountId: string },
+        Array<{ apiKeyId: string; linkedAt: number }>,
+        Name
+      >;
+      getScopeOverrideForAction: FunctionReference<
+        "query",
+        "internal",
+        { action: string; apiKeyId: string; app: string },
+        { allowed: boolean } | null,
+        Name
+      >;
+      getScopeOverrides: FunctionReference<
+        "query",
+        "internal",
+        { apiKeyId: string; app: string },
+        Array<{ action: string; allowed: boolean }>,
+        Name
+      >;
       insertConnection: FunctionReference<
         "mutation",
         "internal",
@@ -117,6 +169,33 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           updatedAt: number;
         },
         string,
+        Name
+      >;
+      linkAccount: FunctionReference<
+        "mutation",
+        "internal",
+        { apiKeyId: string; externalAccountId: string; linkedAt: number },
+        null,
+        Name
+      >;
+      setScopeOverride: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          action: string;
+          allowed: boolean;
+          apiKeyId: string;
+          app: string;
+          updatedAt: number;
+        },
+        null,
+        Name
+      >;
+      unlinkAccount: FunctionReference<
+        "mutation",
+        "internal",
+        { apiKeyId: string },
+        null,
         Name
       >;
       updateConnectionStatus: FunctionReference<

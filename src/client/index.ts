@@ -29,13 +29,26 @@ function extractBearerToken(request: Request): string | null {
 export class AppAccess {
   component: AnyComponentApi;
   private _composioApiKey?: string;
+  private _validateLinkingToken?: (
+    ctx: any,
+    token: string,
+    apiKeyId: string,
+  ) => Promise<{ externalAccountId: string } | { error: string }>;
 
   constructor(
     component: AnyComponentApi,
-    options?: { COMPOSIO_API_KEY?: string },
+    options?: {
+      COMPOSIO_API_KEY?: string;
+      validateLinkingToken?: (
+        ctx: any,
+        token: string,
+        apiKeyId: string,
+      ) => Promise<{ externalAccountId: string } | { error: string }>;
+    },
   ) {
     this.component = component;
     this._composioApiKey = options?.COMPOSIO_API_KEY;
+    this._validateLinkingToken = options?.validateLinkingToken;
   }
 
   private get composioApiKey(): string {
@@ -380,6 +393,23 @@ export class AppAccess {
           );
         }
 
+        // Check scope overrides
+        const scopeOverride = await ctx.runQuery(
+          this.component.public.getScopeOverrideForAction,
+          { apiKeyId: auth.apiKey._id, app: body.app, action: body.action },
+        );
+        if (scopeOverride && !scopeOverride.allowed) {
+          return jsonResponse(
+            {
+              error: {
+                code: "scope_denied",
+                message: `Action ${body.action} is not permitted for this agent. Your account owner has restricted this action.`,
+              },
+            },
+            403,
+          );
+        }
+
         // Look up active connection
         const connection = await ctx.runQuery(
           this.component.public.getActiveConnectionByApiKeyAndApp,
@@ -413,6 +443,78 @@ export class AppAccess {
           success: result.success,
           result: result.result,
         });
+      }),
+    });
+
+    // POST /app-access/v1/link
+    http.route({
+      path: "/app-access/v1/link",
+      method: "POST",
+      handler: httpActionGeneric(async (ctx, request) => {
+        if (!this._validateLinkingToken) {
+          return jsonResponse(
+            {
+              error: {
+                code: "not_implemented",
+                message: "Account linking is not configured",
+              },
+            },
+            501,
+          );
+        }
+
+        const bearerToken = extractBearerToken(request);
+        if (!bearerToken) {
+          return jsonResponse(
+            { error: { code: "unauthorized", message: "Missing authorization header" } },
+            401,
+          );
+        }
+
+        const auth = await authenticateRequest(
+          ctx,
+          this.component.public.getApiKeyByHash,
+          bearerToken,
+        );
+        if ("error" in auth) return auth.error;
+
+        let body: { linking_token?: string };
+        try {
+          body = await request.json();
+        } catch {
+          return jsonResponse(
+            { error: { code: "invalid_request", message: "Invalid JSON body" } },
+            400,
+          );
+        }
+
+        if (!body.linking_token || typeof body.linking_token !== "string") {
+          return jsonResponse(
+            { error: { code: "invalid_request", message: "linking_token is required" } },
+            400,
+          );
+        }
+
+        const validationResult = await this._validateLinkingToken(
+          ctx,
+          body.linking_token,
+          auth.apiKey._id,
+        );
+
+        if ("error" in validationResult) {
+          return jsonResponse(
+            { error: { code: "invalid_token", message: validationResult.error } },
+            400,
+          );
+        }
+
+        await ctx.runMutation(this.component.public.linkAccount, {
+          apiKeyId: auth.apiKey._id,
+          externalAccountId: validationResult.externalAccountId,
+          linkedAt: Date.now(),
+        });
+
+        return jsonResponse({ status: "linked" });
       }),
     });
   }

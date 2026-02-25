@@ -25,4 +25,22 @@ export default defineSchema({
   })
     .index("by_api_key", ["apiKeyId"])
     .index("by_api_key_app", ["apiKeyId", "app"]),
+
+  scope_overrides: defineTable({
+    apiKeyId: v.id("apiKeys"),
+    app: v.string(),
+    action: v.string(),
+    allowed: v.boolean(),
+    updatedAt: v.number(),
+  })
+    .index("by_api_key_app", ["apiKeyId", "app"])
+    .index("by_api_key_app_action", ["apiKeyId", "app", "action"]),
+
+  account_links: defineTable({
+    apiKeyId: v.id("apiKeys"),
+    externalAccountId: v.string(),
+    linkedAt: v.number(),
+  })
+    .index("by_api_key", ["apiKeyId"])
+    .index("by_external_account", ["externalAccountId"]),
 });

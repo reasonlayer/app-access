@@ -20,3 +20,7 @@ export function isActionAllowed(app: string, action: string): boolean {
 export function getAllowedActions(app: string): string[] {
   return APP_ACTIONS[app] ?? [];
 }
+
+export function getAppActions(): Record<string, string[]> {
+  return { ...APP_ACTIONS };
+}
