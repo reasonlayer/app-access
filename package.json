@@ -1,6 +1,6 @@
 {
   "name": "@reasonlayer/app-access",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Convex component for managing third-party app access via API keys and OAuth connections",
   "type": "module",
   "license": "MIT",
