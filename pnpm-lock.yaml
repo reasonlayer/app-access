@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@convex-dev/migrations':
+        specifier: ^0.3.1
+        version: 0.3.1(convex@1.32.0)
     devDependencies:
       '@edge-runtime/vm':
         specifier: ^5.0.0
@@ -25,6 +29,11 @@ importers:
         version: 4.0.18(@edge-runtime/vm@5.0.0)(@opentelemetry/api@1.9.0)(@types/node@25.3.0)
 
 packages:
+
+  '@convex-dev/migrations@0.3.1':
+    resolution: {integrity: sha512-dGiN82vWMN415/AGMcVooDOJk8iTousZahBBs27uA03pL74Uo3ksucUW3CiCfPx75rv+x9UnenEakimQYYNIrA==}
+    peerDependencies:
+      convex: ^1.24.8
 
   '@edge-runtime/primitives@6.0.0':
     resolution: {integrity: sha512-FqoxaBT+prPBHBwE1WXS1ocnu/VLTQyZ6NMUBAdbP7N2hsFTTxMC/jMu2D/8GAlMQfxeuppcPuCUk/HO3fpIvA==}
@@ -587,6 +596,10 @@ packages:
         optional: true
 
 snapshots:
+
+  '@convex-dev/migrations@0.3.1(convex@1.32.0)':
+    dependencies:
+      convex: 1.32.0
 
   '@edge-runtime/primitives@6.0.0': {}
 

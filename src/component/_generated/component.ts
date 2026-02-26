@@ -52,11 +52,20 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    dataMigrations: {
+      removeAgentNames: FunctionReference<
+        "mutation",
+        "internal",
+        any,
+        any,
+        Name
+      >;
+    };
     public: {
       createApiKey: FunctionReference<
         "mutation",
         "internal",
-        { agentName: string },
+        {},
         { apiKey: string; apiKeyId: string },
         Name
       >;
@@ -87,24 +96,14 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "query",
         "internal",
         { apiKeyHash: string },
-        {
-          _id: string;
-          agentName: string;
-          createdAt: number;
-          status: "active" | "revoked";
-        } | null,
+        { _id: string; createdAt: number; status: "active" | "revoked" } | null,
         Name
       >;
       getApiKeyById: FunctionReference<
         "query",
         "internal",
         { id: string },
-        {
-          _id: string;
-          agentName: string;
-          createdAt: number;
-          status: "active" | "revoked";
-        } | null,
+        { _id: string; createdAt: number; status: "active" | "revoked" } | null,
         Name
       >;
       getConnectionById: FunctionReference<

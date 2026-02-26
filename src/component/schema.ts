@@ -3,10 +3,11 @@ import { v } from "convex/values";
 
 export default defineSchema({
   apiKeys: defineTable({
-    agentName: v.string(),
     apiKeyHash: v.string(),
     status: v.union(v.literal("active"), v.literal("revoked")),
     createdAt: v.number(),
+    // Deprecated — removed via migration. Keep optional until migration completes.
+    agentName: v.optional(v.string()),
   }).index("by_api_key_hash", ["apiKeyHash"]),
 
   connections: defineTable({

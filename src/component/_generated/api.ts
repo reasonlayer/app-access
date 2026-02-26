@@ -9,6 +9,7 @@
  */
 
 import type * as actions from "../actions.js";
+import type * as dataMigrations from "../dataMigrations.js";
 import type * as lib_actions from "../lib/actions.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_composio from "../lib/composio.js";
@@ -24,6 +25,7 @@ import { anyApi, componentsGeneric } from "convex/server";
 
 const fullApi: ApiFromModules<{
   actions: typeof actions;
+  dataMigrations: typeof dataMigrations;
   "lib/actions": typeof lib_actions;
   "lib/auth": typeof lib_auth;
   "lib/composio": typeof lib_composio;

@@ -2,7 +2,6 @@ import { hashApiKey } from "./keys";
 
 type ApiKeyDoc = {
   _id: string;
-  agentName: string;
   status: "active" | "revoked";
   createdAt: number;
 };

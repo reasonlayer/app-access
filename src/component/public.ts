@@ -10,13 +10,12 @@ const connectionStatusValidator = v.union(
 );
 
 export const createApiKey = mutation({
-  args: { agentName: v.string() },
+  args: {},
   returns: v.object({ apiKey: v.string(), apiKeyId: v.string() }),
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
     const apiKey = generateApiKey();
     const apiKeyHash = await hashApiKey(apiKey);
     const id = await ctx.db.insert("apiKeys", {
-      agentName: args.agentName,
       apiKeyHash,
       status: "active",
       createdAt: Date.now(),
@@ -30,7 +29,6 @@ export const getApiKeyByHash = query({
   returns: v.union(
     v.object({
       _id: v.string(),
-      agentName: v.string(),
       status: v.union(v.literal("active"), v.literal("revoked")),
       createdAt: v.number(),
     }),
@@ -44,7 +42,6 @@ export const getApiKeyByHash = query({
     if (!doc) return null;
     return {
       _id: doc._id,
-      agentName: doc.agentName,
       status: doc.status,
       createdAt: doc.createdAt,
     };
@@ -282,7 +279,6 @@ export const getApiKeyById = query({
   returns: v.union(
     v.object({
       _id: v.id("apiKeys"),
-      agentName: v.string(),
       status: v.union(v.literal("active"), v.literal("revoked")),
       createdAt: v.number(),
     }),
@@ -293,7 +289,6 @@ export const getApiKeyById = query({
     if (!doc) return null;
     return {
       _id: doc._id,
-      agentName: doc.agentName,
       status: doc.status,
       createdAt: doc.createdAt,
     };

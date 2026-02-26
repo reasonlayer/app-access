@@ -13,8 +13,8 @@ describe("createApiKey", () => {
   it("returns a key starting with rl_ak_", async () => {
     const t = convexTest(schema, modules);
     const result = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
     expect(result.apiKey.startsWith("rl_ak_")).toBe(true);
     expect(result.apiKey).toHaveLength(70);
     expect(result.apiKeyId).toBeTruthy();
@@ -25,8 +25,8 @@ describe("getApiKeyByHash", () => {
   it("round-trips: create then lookup by hash", async () => {
     const t = convexTest(schema, modules);
     const { apiKey } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const { hashApiKey } = await import("./lib/keys");
     const hash = await hashApiKey(apiKey);
@@ -35,7 +35,6 @@ describe("getApiKeyByHash", () => {
       apiKeyHash: hash,
     });
     expect(result).not.toBeNull();
-    expect(result!.agentName).toBe("test-agent");
     expect(result!.status).toBe("active");
   });
 
@@ -54,8 +53,8 @@ describe("insertConnection + getConnectionById", () => {
 
     // Create an API key first
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const now = Date.now();
     const connectionId = await t.mutation(api.public.insertConnection, {
@@ -83,8 +82,8 @@ describe("getActiveConnectionByApiKeyAndApp", () => {
     const t = convexTest(schema, modules);
 
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const now = Date.now();
     await t.mutation(api.public.insertConnection, {
@@ -108,8 +107,8 @@ describe("getActiveConnectionByApiKeyAndApp", () => {
     const t = convexTest(schema, modules);
 
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const now = Date.now();
     await t.mutation(api.public.insertConnection, {
@@ -133,8 +132,8 @@ describe("setScopeOverride + getScopeOverrides", () => {
   it("creates and retrieves scope overrides", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     await t.mutation(api.public.setScopeOverride, {
       apiKeyId,
@@ -156,8 +155,8 @@ describe("setScopeOverride + getScopeOverrides", () => {
   it("upserts on duplicate", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     await t.mutation(api.public.setScopeOverride, {
       apiKeyId,
@@ -188,8 +187,8 @@ describe("getScopeOverrideForAction", () => {
   it("returns null when no override exists", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const result = await t.query(api.public.getScopeOverrideForAction, {
       apiKeyId,
@@ -202,8 +201,8 @@ describe("getScopeOverrideForAction", () => {
   it("returns override when one exists", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     await t.mutation(api.public.setScopeOverride, {
       apiKeyId,
@@ -227,8 +226,8 @@ describe("linkAccount + getAccountLink", () => {
   it("links and retrieves account", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const now = Date.now();
     await t.mutation(api.public.linkAccount, {
@@ -246,8 +245,8 @@ describe("linkAccount + getAccountLink", () => {
   it("upserts on duplicate link", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     await t.mutation(api.public.linkAccount, {
       apiKeyId,
@@ -270,11 +269,11 @@ describe("getLinkedApiKeys", () => {
   it("returns linked API keys for an account", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId: key1 } = await t.mutation(api.public.createApiKey, {
-      agentName: "agent-1",
-    });
+      
+});
     const { apiKeyId: key2 } = await t.mutation(api.public.createApiKey, {
-      agentName: "agent-2",
-    });
+      
+});
 
     const now = Date.now();
     await t.mutation(api.public.linkAccount, {
@@ -299,8 +298,8 @@ describe("unlinkAccount", () => {
   it("removes account link", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     await t.mutation(api.public.linkAccount, {
       apiKeyId,
@@ -317,8 +316,8 @@ describe("unlinkAccount", () => {
   it("is a no-op when no link exists", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     // Should not throw
     await t.mutation(api.public.unlinkAccount, { apiKeyId });
@@ -329,12 +328,11 @@ describe("getApiKeyById", () => {
   it("returns API key by ID", async () => {
     const t = convexTest(schema, modules);
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const result = await t.query(api.public.getApiKeyById, { id: apiKeyId });
     expect(result).not.toBeNull();
-    expect(result!.agentName).toBe("test-agent");
     expect(result!.status).toBe("active");
   });
 });
@@ -344,8 +342,8 @@ describe("updateConnectionStatus", () => {
     const t = convexTest(schema, modules);
 
     const { apiKeyId } = await t.mutation(api.public.createApiKey, {
-      agentName: "test-agent",
-    });
+      
+});
 
     const now = Date.now();
     const connectionId = await t.mutation(api.public.insertConnection, {

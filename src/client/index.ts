@@ -34,6 +34,17 @@ export class AppAccess {
     token: string,
     apiKeyId: string,
   ) => Promise<{ externalAccountId: string } | { error: string }>;
+  private _onBeforeActionExecute?: (
+    ctx: any,
+    request: {
+      apiKeyId: string;
+      app: string;
+      action: string;
+      params: Record<string, unknown>;
+      composioConnectionId: string;
+      composioEntityId: string;
+    },
+  ) => Promise<Response | null>;
 
   constructor(
     component: AnyComponentApi,
@@ -44,11 +55,23 @@ export class AppAccess {
         token: string,
         apiKeyId: string,
       ) => Promise<{ externalAccountId: string } | { error: string }>;
+      onBeforeActionExecute?: (
+        ctx: any,
+        request: {
+          apiKeyId: string;
+          app: string;
+          action: string;
+          params: Record<string, unknown>;
+          composioConnectionId: string;
+          composioEntityId: string;
+        },
+      ) => Promise<Response | null>;
     },
   ) {
     this.component = component;
     this._composioApiKey = options?.COMPOSIO_API_KEY;
     this._validateLinkingToken = options?.validateLinkingToken;
+    this._onBeforeActionExecute = options?.onBeforeActionExecute;
   }
 
   private get composioApiKey(): string {
@@ -61,26 +84,17 @@ export class AppAccess {
       path: "/app-access/v1/signup",
       method: "POST",
       handler: httpActionGeneric(async (ctx, request) => {
-        let body: { agent_name?: string };
+        // Accept any body (or no body) for backward compatibility with
+        // older agents that still send { "agent_name": "..." }.
         try {
-          body = await request.json();
+          await request.json();
         } catch {
-          return jsonResponse(
-            { error: { code: "invalid_request", message: "Invalid JSON body" } },
-            400,
-          );
-        }
-
-        if (!body.agent_name || typeof body.agent_name !== "string") {
-          return jsonResponse(
-            { error: { code: "invalid_request", message: "agent_name is required" } },
-            400,
-          );
+          // Empty body or non-JSON is fine — we don't need any fields.
         }
 
         const result = await ctx.runMutation(
           this.component.public.createApiKey,
-          { agentName: body.agent_name },
+          {},
         );
 
         return jsonResponse({
@@ -426,6 +440,18 @@ export class AppAccess {
             },
             400,
           );
+        }
+
+        if (this._onBeforeActionExecute) {
+          const hookResponse = await this._onBeforeActionExecute(ctx, {
+            apiKeyId: auth.apiKey._id,
+            app: body.app,
+            action: body.action,
+            params: body.params ?? {},
+            composioConnectionId: connection.composioConnectionId,
+            composioEntityId: connection.composioEntityId || `rl_${auth.apiKey._id}`,
+          });
+          if (hookResponse) return hookResponse;
         }
 
         const result = await ctx.runAction(

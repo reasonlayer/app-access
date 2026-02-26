@@ -43,9 +43,7 @@ curl -s https://reasonlayer.com/skill.md > ~/.reasonlayer/skills/SKILL.md
 Every agent needs to register and get an API key:
 
 ```bash
-curl -s -X POST https://api.reasonlayer.com/app-access/v1/signup \
-  -H "Content-Type: application/json" \
-  -d '{"agent_name": "YourAgentName"}'
+curl -s -X POST https://api.reasonlayer.com/app-access/v1/signup
 ```
 
 Response:
@@ -88,7 +86,7 @@ Response:
 
 After linking, your human can manage your permissions from their Reasonlayer dashboard.
 
-If you get a **403 scope_denied** error when calling an action, it means your human has disabled that action. Tell your human to enable the action from their dashboard.
+If you get a **403 scope_denied** error when calling an action, it means your human has blocked that action. If you get a **202 pending_approval** response, the action requires your human's approval — tell them to check their Reasonlayer dashboard, and check `/notifications` later for the result.
 
 ---
 
@@ -309,6 +307,7 @@ curl -s -X POST https://api.reasonlayer.com/app-access/v1/action \
 | **Fetch inbox** | Get recent emails | When human asks "what's in my inbox?" |
 | **Read message** | Get a specific email by ID | When you need the full content of one email |
 | **Read thread** | Get all messages in a conversation | When you need the full conversation history |
+| **Check notifications** | Get results of approved/denied actions | After pending_approval response |
 
 ---
 
@@ -318,9 +317,57 @@ curl -s -X POST https://api.reasonlayer.com/app-access/v1/action \
 |---|---|---|
 | 400 | Invalid request (missing fields, unsupported app/action) | Check your request body |
 | 401 | Invalid or missing API key | Re-read `~/.reasonlayer/credentials` or call `/signup` |
+| 202 | pending_approval — requires human approval | Tell your human, check /notifications later |
 | 403 | scope_denied — action disabled by account owner | Tell your human to enable the action in their dashboard |
 | 404 | Connection not found | Check `connection_id` |
 | 500 | Server error | Retry after a short delay |
+
+---
+
+## Handling Approval-Required Actions
+
+Some actions may require your human's approval before executing. When this happens, you'll get a `202` response:
+
+```json
+{
+  "status": "pending_approval",
+  "approval_id": "abc123",
+  "message": "This action requires approval from your account owner.",
+  "expires_at": 1706234567890
+}
+```
+
+**When this happens:**
+1. Tell your human the action is waiting for their approval in the Reasonlayer dashboard
+2. Continue with other work — do NOT poll or retry
+3. Check notifications at a natural break point:
+
+```bash
+curl -s https://api.reasonlayer.com/app-access/v1/notifications \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+Response:
+```json
+{
+  "notifications": [
+    {
+      "approval_id": "abc123",
+      "app": "gmail",
+      "action": "GMAIL_SEND_EMAIL",
+      "status": "approved",
+      "success": true,
+      "result": { ... },
+      "requested_at": 1706230967890,
+      "resolved_at": 1706231067890
+    }
+  ]
+}
+```
+
+Each notification is delivered once. The server executes the action automatically on approval — you do NOT need to re-execute it.
+
+Possible statuses: `approved` (check `success` and `result`), `denied` (check `denial_reason`), `expired` (re-submit if still needed).
 
 ---
 
@@ -354,7 +401,7 @@ Reasonlayer connects your agent to your human's real apps. This means:
 ## Quick Start Checklist
 
 1. Check for existing credentials: `cat ~/.reasonlayer/credentials`
-2. If none, register: `POST /signup` with your agent name
+2. If none, register: `POST /signup`
 3. Save your API key to `~/.reasonlayer/credentials`
 4. Connect Gmail: `POST /connect` with `{"app": "gmail"}`
 5. Send your human the auth URL
