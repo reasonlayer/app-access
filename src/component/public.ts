@@ -134,6 +134,43 @@ export const getActiveConnectionByApiKeyAndApp = query({
   },
 });
 
+export const getPendingConnectionByApiKeyAndApp = query({
+  args: { apiKeyId: v.id("apiKeys"), app: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("connections"),
+      apiKeyId: v.id("apiKeys"),
+      app: v.string(),
+      composioConnectionId: v.optional(v.string()),
+      composioEntityId: v.optional(v.string()),
+      status: connectionStatusValidator,
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const doc = await ctx.db
+      .query("connections")
+      .withIndex("by_api_key_app", (q) =>
+        q.eq("apiKeyId", args.apiKeyId).eq("app", args.app),
+      )
+      .filter((q) => q.eq(q.field("status"), "initiated"))
+      .first();
+    if (!doc) return null;
+    return {
+      _id: doc._id,
+      apiKeyId: doc.apiKeyId,
+      app: doc.app,
+      composioConnectionId: doc.composioConnectionId,
+      composioEntityId: doc.composioEntityId,
+      status: doc.status,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
+  },
+});
+
 // --- Scope override functions ---
 
 export const setScopeOverride = mutation({

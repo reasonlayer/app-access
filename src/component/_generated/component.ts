@@ -141,6 +141,22 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Array<{ apiKeyId: string; linkedAt: number }>,
         Name
       >;
+      getPendingConnectionByApiKeyAndApp: FunctionReference<
+        "query",
+        "internal",
+        { apiKeyId: string; app: string },
+        {
+          _id: string;
+          apiKeyId: string;
+          app: string;
+          composioConnectionId?: string;
+          composioEntityId?: string;
+          createdAt: number;
+          status: "initiated" | "active" | "expired" | "failed";
+          updatedAt: number;
+        } | null,
+        Name
+      >;
       getScopeOverrideForAction: FunctionReference<
         "query",
         "internal",

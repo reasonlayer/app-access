@@ -36,9 +36,21 @@ export async function initiateConnection(args: {
 
   const configData = await configRes.json();
   const items = configData.items ?? configData;
-  const authConfig = Array.isArray(items) ? items[0] : null;
+  const allConfigs = Array.isArray(items) ? items : [];
+
+  // Composio may return all auth configs regardless of the toolkit_slugs[] filter.
+  // Match by toolkit_slug, app_name, or name prefix (e.g. "github-ac-sy2" starts with "github").
+  const authConfig =
+    allConfigs.find(
+      (c: Record<string, unknown>) =>
+        c.toolkit_slug === args.app ||
+        c.app_name === args.app ||
+        (typeof c.name === "string" && c.name.startsWith(args.app)),
+    ) ?? null;
   if (!authConfig?.id) {
-    throw new Error(`No auth config found for app "${args.app}"`);
+    throw new Error(
+      `No auth config found for app "${args.app}". Available configs: ${JSON.stringify(allConfigs.map((c: Record<string, unknown>) => ({ id: c.id, name: c.name, toolkit_slug: c.toolkit_slug })))}`,
+    );
   }
   const authConfigId: string = authConfig.id;
 

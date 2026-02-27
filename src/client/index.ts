@@ -1,7 +1,7 @@
 import { httpActionGeneric } from "convex/server";
 import type { HttpRouter } from "convex/server";
 import { authenticateRequest } from "../component/lib/auth";
-import { isActionAllowed, getAllowedActions } from "../component/lib/actions";
+import { isAppSupported, getSupportedApps, isActionAllowed, getAllowedActions } from "../component/lib/actions";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -134,9 +134,9 @@ export class AppAccess {
           );
         }
 
-        if (body.app !== "gmail") {
+        if (!body.app || !isAppSupported(body.app)) {
           return jsonResponse(
-            { error: { code: "invalid_request", message: "Unsupported app. Supported: gmail" } },
+            { error: { code: "invalid_request", message: `Unsupported app. Supported: ${getSupportedApps().join(", ")}` } },
             400,
           );
         }
@@ -152,6 +152,36 @@ export class AppAccess {
             status: existing.status,
             app: existing.app,
             message: "Active connection already exists",
+          });
+        }
+
+        // Check for existing initiated (pending) connection — reuse it instead of creating duplicates
+        const pending = await ctx.runQuery(
+          this.component.public.getPendingConnectionByApiKeyAndApp,
+          { apiKeyId: auth.apiKey._id, app: body.app },
+        );
+        if (pending) {
+          // Re-initiate via Composio to get a fresh auth URL for the existing connection
+          const entityId = pending.composioEntityId || `rl_${auth.apiKey._id}`;
+          const composioResult = await ctx.runAction(
+            this.component.actions.initiateComposioConnection,
+            { composioApiKey: this.composioApiKey, entityId, app: body.app },
+          );
+
+          await ctx.runMutation(
+            this.component.public.updateConnectionStatus,
+            {
+              id: pending._id,
+              status: "initiated" as const,
+              updatedAt: Date.now(),
+              composioConnectionId: composioResult.connectionId,
+            },
+          );
+
+          return jsonResponse({
+            connection_id: pending._id,
+            auth_url: composioResult.authUrl,
+            status: "initiated",
           });
         }
 
@@ -381,9 +411,9 @@ export class AppAccess {
           );
         }
 
-        if (body.app !== "gmail") {
+        if (!isAppSupported(body.app)) {
           return jsonResponse(
-            { error: { code: "invalid_request", message: "Unsupported app. Supported: gmail" } },
+            { error: { code: "invalid_request", message: `Unsupported app. Supported: ${getSupportedApps().join(", ")}` } },
             400,
           );
         }
